@@ -1,0 +1,9 @@
+# Copie para local.properties e ajuste os valores.
+# O arquivo local.properties não é commitado (.gitignore).
+
+# Caminho do Android SDK (o Android Studio preenche automaticamente)
+# sdk.dir=C\:\\Users\\SeuUsuario\\AppData\\Local\\Android\\Sdk
+
+# URL base da API (usada pelo NetworkModule em cada desafio)
+# Ex.: https://api.ciandt.com/
+API_BASE_URL=https\://api.example.com/
