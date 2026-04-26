@@ -1,107 +1,107 @@
 # Android Senior Starter Kit
 
-Boilerplate para projetos Android com arquitetura limpa e práticas de nível sênior, pronto para escalar. Inclui Jetpack Compose, MVVM, Clean Architecture, injeção de dependência com Hilt e camada de rede com Retrofit — tudo conectado e configurado para que você comece novos desafios e features focando apenas no que importa.
+Production-ready boilerplate for Android projects built with clean architecture and senior-level best practices, designed to scale. Includes Jetpack Compose, MVVM, Clean Architecture, dependency injection with Hilt, and a networking layer with Retrofit — all wired up and configured so you can jump straight into new features and challenges.
 
 ## Tech Stack
 
-| Camada | Tecnologia |
+| Layer | Technology |
 |---|---|
-| **Linguagem** | Kotlin |
+| **Language** | Kotlin |
 | **UI** | Jetpack Compose · Material 3 · Dynamic Color (Android 12+) |
-| **Arquitetura** | Clean Architecture · MVVM |
+| **Architecture** | Clean Architecture · MVVM |
 | **DI** | Hilt / Dagger |
-| **Rede** | Retrofit 2 · OkHttp · Gson |
+| **Networking** | Retrofit 2 · OkHttp · Gson |
 | **Async** | Coroutines · StateFlow |
-| **Testes** | JUnit 4 · Espresso · MockK · Turbine |
+| **Testing** | JUnit 4 · Espresso · MockK · Turbine |
 | **Build** | Gradle (Kotlin DSL) · Version Catalog (`libs.versions.toml`) |
 | **SDK** | Min 24 (Android 7.0) · Target/Compile 35 |
 
-## Arquitetura
+## Architecture
 
-O projeto segue **Clean Architecture** dividida em camadas com responsabilidades bem definidas:
+The project follows **Clean Architecture** split into layers with well-defined responsibilities:
 
 ```
 app/
-├── di/                     # Módulos Hilt (NetworkModule, ...)
+├── di/                     # Hilt modules (NetworkModule, ...)
 ├── domain/
 │   ├── model/              # Resource<T> (Loading / Success / Error)
-│   ├── repository/         # Contratos de repositório
+│   ├── repository/         # Repository contracts
 │   └── usecase/            # UseCase<P, R> + NoParams
 ├── presentation/
-│   └── viewmodel/          # BaseViewModel<T> com StateFlow
+│   └── viewmodel/          # BaseViewModel<T> with StateFlow
 └── ui/
-    └── theme/              # Material 3 theme, cores, tipografia
+    └── theme/              # Material 3 theme, colors, typography
 ```
 
-### Fluxo de dados
+### Data Flow
 
 ```
 View (Compose)
-  │  observa StateFlow<Resource<T>>
+  │  observes StateFlow<Resource<T>>
   ▼
 ViewModel  ──►  UseCase  ──►  Repository  ──►  API (Retrofit)
   │                                               │
   └──────────  Resource.Loading / Success / Error ◄┘
 ```
 
-### Principais abstrações
+### Key Abstractions
 
-- **`Resource<T>`** — sealed class que encapsula os três estados de uma operação assíncrona (`Loading`, `Success`, `Error`).
-- **`UseCase<P, R>`** — contrato para casos de uso com `operator fun invoke`, mantendo uma ação por classe.
-- **`Repository`** — interface-marcadora para repositórios do domínio.
-- **`BaseViewModel<T>`** — ViewModel genérico que expõe `uiState: StateFlow<Resource<T>>` pronto para ser observado pela UI.
+- **`Resource<T>`** — sealed class that wraps the three states of an async operation (`Loading`, `Success`, `Error`).
+- **`UseCase<P, R>`** — contract for use cases with `operator fun invoke`, enforcing a single action per class.
+- **`Repository`** — marker interface for domain repositories.
+- **`BaseViewModel<T>`** — generic ViewModel that exposes `uiState: StateFlow<Resource<T>>` ready to be observed by the UI.
 
-## Primeiros passos
+## Getting Started
 
-### Pré-requisitos
+### Prerequisites
 
-- Android Studio Hedgehog (2023.1+) ou superior
+- Android Studio Hedgehog (2023.1+) or later
 - JDK 11+
-- Android SDK com API 35 instalada
+- Android SDK with API 35 installed
 
 ### Setup
 
 ```bash
-# 1. Clone o repositório
+# 1. Clone the repository
 git clone https://github.com/cristianopcortez/android-senior-starter-kit.git
 cd android-senior-starter-kit
 
-# 2. Crie o arquivo de propriedades locais
+# 2. Create the local properties file
 cp local.properties.example local.properties
 
-# 3. Ajuste a URL base da API no local.properties
-#    API_BASE_URL=https://sua-api.com/
+# 3. Set your API base URL in local.properties
+#    API_BASE_URL=https://your-api.com/
 ```
 
-Abra o projeto no Android Studio, sincronize o Gradle e execute no emulador ou dispositivo.
+Open the project in Android Studio, sync Gradle, and run on an emulator or device.
 
-### Configuração da API
+### API Configuration
 
-A URL base é lida de `local.properties` e injetada via `BuildConfig.API_BASE_URL`. Para alterar:
+The base URL is read from `local.properties` and injected via `BuildConfig.API_BASE_URL`. To change it:
 
 ```properties
 # local.properties
-API_BASE_URL=https\://api.exemplo.com/
+API_BASE_URL=https\://api.example.com/
 ```
 
-## Como usar como base para novos desafios
+## Using as a Base for New Features
 
-1. **Crie seu Service** — defina a interface Retrofit no pacote `data/api/`.
-2. **Crie seu Repository** — implemente a interface do domínio em `data/repository/`.
-3. **Crie seu UseCase** — implemente `UseCase<P, R>` em `domain/usecase/`.
-4. **Crie seu ViewModel** — estenda `BaseViewModel<T>` e chame o use case.
-5. **Crie sua Tela** — composable que observa `viewModel.uiState.collectAsState()`.
-6. **Registre no Hilt** — adicione `@Binds` / `@Provides` no módulo DI correspondente.
+1. **Create your Service** — define the Retrofit interface in the `data/api/` package.
+2. **Create your Repository** — implement the domain interface in `data/repository/`.
+3. **Create your UseCase** — implement `UseCase<P, R>` in `domain/usecase/`.
+4. **Create your ViewModel** — extend `BaseViewModel<T>` and call the use case.
+5. **Create your Screen** — composable that observes `viewModel.uiState.collectAsState()`.
+6. **Register in Hilt** — add `@Binds` / `@Provides` in the corresponding DI module.
 
-## Estrutura de pastas
+## Project Structure
 
 ```
 .
 ├── app/
-│   ├── build.gradle.kts            # Dependências e config do módulo
+│   ├── build.gradle.kts            # Module dependencies and config
 │   ├── proguard-rules.pro
 │   └── src/
-│       ├── androidTest/             # Testes instrumentados
+│       ├── androidTest/             # Instrumented tests
 │       ├── main/
 │       │   ├── AndroidManifest.xml
 │       │   ├── java/.../
@@ -110,14 +110,14 @@ API_BASE_URL=https\://api.exemplo.com/
 │       │   │   ├── presentation/    # ViewModels
 │       │   │   └── ui/theme/        # Compose theming
 │       │   └── res/                 # Drawables, strings, themes
-│       └── test/                    # Testes unitários
-├── build.gradle.kts                 # Config raiz do Gradle
+│       └── test/                    # Unit tests
+├── build.gradle.kts                 # Root Gradle config
 ├── gradle/
-│   └── libs.versions.toml           # Version catalog centralizado
+│   └── libs.versions.toml           # Centralized version catalog
 ├── settings.gradle.kts
-└── local.properties.example         # Template de configuração local
+└── local.properties.example         # Local configuration template
 ```
 
-## Licença
+## License
 
-Este projeto está disponível sob a licença [MIT](LICENSE).
+This project is available under the [MIT](LICENSE) license.
