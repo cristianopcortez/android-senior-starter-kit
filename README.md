@@ -1,5 +1,7 @@
 # Android Senior Starter Kit
 
+*[README em Português](README.pt-BR.md)*
+
 Production-ready boilerplate for Android projects built with clean architecture and senior-level best practices, designed to scale. Includes Jetpack Compose, MVVM, Clean Architecture, dependency injection with Hilt, and a networking layer with Retrofit — all wired up and configured so you can jump straight into new features and challenges.
 
 ## Tech Stack
@@ -93,6 +95,8 @@ API_BASE_URL=https\://api.example.com/
 5. **Create your Screen** — composable that observes `viewModel.uiState.collectAsState()`.
 6. **Register in Hilt** — add `@Binds` / `@Provides` in the corresponding DI module.
 
+When starting a brand-new app from this repo, also rename `applicationId`, namespace, Kotlin package (`br.com.ccortez.seniorstarterkitapplication`), and `rootProject.name` in `settings.gradle.kts`.
+
 ## Project Structure
 
 ```
@@ -117,6 +121,14 @@ API_BASE_URL=https\://api.example.com/
 ├── settings.gradle.kts
 └── local.properties.example         # Local configuration template
 ```
+
+### Version catalog extras
+
+[`libs.versions.toml`](gradle/libs.versions.toml) pins **Coil**, **MockK**, and **Turbine** alongside the libraries already wired in `:app`. Add them in `app/build.gradle.kts` when you enable image loading or those tests.
+
+## Branches
+
+Keep the **default branch** as this lean template so every clone stays a sane foundation for new apps. If you ship a fuller **portfolio demo** (remote API flows, richer UI), maintain it on a **separate branch** and mention it near the top of this README once it exists.
 
 ## License
 
