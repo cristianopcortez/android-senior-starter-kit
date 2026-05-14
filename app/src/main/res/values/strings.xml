@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Senior Starter Kit Application</string>
+
+    <!-- Hacker News (portfolio) screen -->
+    <string name="hn_front_page_title">Hacker News · Front Page</string>
+    <string name="content_desc_reload_stories">Reload stories</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="hn_empty_list">No stories returned.</string>
+    <string name="hn_story_metadata">%1$d pts · %2$d comments · %3$s</string>
+
+    <!-- Preview only -->
+    <string name="preview_hn_story_title">Sample HN headline that can span more than one line for preview</string>
+    <string name="preview_hn_story_title_second">Second story</string>
+    <string name="preview_hn_author">preview_author</string>
 </resources>

@@ -4,6 +4,8 @@
 
 Production-ready boilerplate for Android projects built with clean architecture and senior-level best practices, designed to scale. Includes Jetpack Compose, MVVM, Clean Architecture, dependency injection with Hilt, and a networking layer with Retrofit — all wired up and configured so you can jump straight into new features and challenges.
 
+**This branch (`feature/portfolio-hacker-news-demo`):** demo data comes from Algolia's **[Hacker News Search API](https://hn.algolia.com/api)** (public HTTPS endpoints, no API key).
+
 ## Tech Stack
 
 | Layer | Technology |
