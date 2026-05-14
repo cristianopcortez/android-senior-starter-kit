@@ -88,6 +88,26 @@ The base URL is read from `local.properties` and injected via `BuildConfig.API_B
 API_BASE_URL=https\://api.example.com/
 ```
 
+### Product flavors (`:app`)
+
+The app module declares three **`environment`** product flavors:
+
+| Flavor | `applicationId` suffix | Typical use |
+| --- | --- | --- |
+| **dev** | `.dev` | Day-to-day development |
+| **homolog** | `.homolog` | Staging / QA / acceptance testing |
+| **prod** | *(none)* | Store / production (uses the base `applicationId` from `defaultConfig`) |
+
+`HN_SITE_BASE_URL` and `HN_ALGOLIA_BASE_URL` live in `BuildConfig`; defaults are set in `defaultConfig` inside `app/build.gradle.kts`. Override them inside the relevant `productFlavors` entry when each environment needs different endpoints.
+
+In Android Studio, pick the variant under **Build → Select Build Variant** (for example `prodDebug` or `homologRelease`). From the command line:
+
+```bash
+./gradlew :app:assembleDevDebug
+./gradlew :app:assembleHomologRelease
+./gradlew :app:assembleProdRelease
+```
+
 ## Using as a Base for New Features
 
 1. **Create your Service** — define the Retrofit interface in the `data/api/` package.

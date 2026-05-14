@@ -1,7 +1,9 @@
 package br.com.ccortez.seniorstarterkitapplication.data
 
-internal object HackerNewsWeb {
-    const val SITE_BASE_URL = "https://news.ycombinator.com"
+import br.com.ccortez.seniorstarterkitapplication.BuildConfig
 
-    fun itemUrl(id: String): String = "$SITE_BASE_URL/item?id=$id"
+internal object HackerNewsWeb {
+    val siteBaseUrl: String get() = BuildConfig.HN_SITE_BASE_URL
+
+    fun itemUrl(id: String): String = "${siteBaseUrl.trimEnd('/')}/item?id=$id"
 }

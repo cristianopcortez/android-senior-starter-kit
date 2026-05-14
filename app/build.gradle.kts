@@ -30,6 +30,35 @@ android {
             "API_BASE_URL",
             "\"${localProperties.getProperty("API_BASE_URL", "https://api.example.com/")}\""
         )
+        // Can be overridden per flavor when URLs differ by environment.
+        buildConfigField(
+            "String",
+            "HN_SITE_BASE_URL",
+            "\"https://news.ycombinator.com\""
+        )
+        buildConfigField(
+            "String",
+            "HN_ALGOLIA_BASE_URL",
+            "\"https://hn.algolia.com/api/v1/\""
+        )
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        create("homolog") {
+            dimension = "environment"
+            applicationIdSuffix = ".homolog"
+            versionNameSuffix = "-homolog"
+        }
+        create("prod") {
+            dimension = "environment"
+            // No applicationIdSuffix: uses the base applicationId from defaultConfig (store / production).
+        }
     }
 
     buildTypes {

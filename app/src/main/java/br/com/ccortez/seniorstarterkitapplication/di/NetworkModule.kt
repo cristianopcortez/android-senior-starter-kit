@@ -23,7 +23,7 @@ const val RETROFIT_HN = "retrofit_hn"
  *
  * `@Named([RETROFIT_APP])`: base URL de [BuildConfig.API_BASE_URL] (`local.properties` → API_BASE_URL).
  *
- * `@Named([RETROFIT_HN])`: [Algolia HN API](https://hn.algolia.com/api) (HTTPS, sem chave).
+ * `@Named([RETROFIT_HN])`: [Algolia HN API](https://hn.algolia.com/api); base em [BuildConfig.HN_ALGOLIA_BASE_URL].
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,9 +34,6 @@ object NetworkModule {
     private const val READ_TIMEOUT_SEC = 30L
 
     private const val WRITE_TIMEOUT_SEC = 30L
-
-    /** Base Algolia endpoint; deve terminar com `/` para o Retrofit resolver paths relativos. */
-    private const val HN_ALGOLIA_BASE_URL = "https://hn.algolia.com/api/v1/"
 
     @Provides
     fun provideOkHttpClient(
@@ -73,7 +70,7 @@ object NetworkModule {
     @Named(RETROFIT_HN)
     fun provideHackerNewsRetrofit(okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl(HN_ALGOLIA_BASE_URL)
+            .baseUrl(BuildConfig.HN_ALGOLIA_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
