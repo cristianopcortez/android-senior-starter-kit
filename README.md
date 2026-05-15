@@ -2,9 +2,9 @@
 
 *[README em Português](README.pt-BR.md)*
 
-Production-ready boilerplate for Android projects built with clean architecture and senior-level best practices, designed to scale. Includes Jetpack Compose, MVVM, Clean Architecture, dependency injection with Hilt, and a networking layer with Retrofit — all wired up and configured so you can jump straight into new features and challenges.
+Production-ready boilerplate for Android projects built with clean architecture and senior-level best practices, designed to scale. Includes Jetpack Compose, MVVM, Clean Architecture, dependency injection with Hilt, a networking layer with Retrofit, and **SSL certificate pinning** (Network Security Config) for the demo API host — all wired up and configured so you can jump straight into new features and challenges.
 
-**This branch (`feature/portfolio-hacker-news-demo`):** demo data comes from Algolia's **[Hacker News Search API](https://hn.algolia.com/api)** (public HTTPS endpoints, no API key).
+**This branch (`feature/portfolio-hacker-news-demo`):** demo data comes from Algolia's **[Hacker News Search API](https://hn.algolia.com/api)** (public HTTPS endpoints, no API key), with **HTTPS to `hn.algolia.com` pinned** as described in [Network Security & SSL Pinning](#network-security--ssl-pinning) below.
 
 ## Tech Stack
 
@@ -14,7 +14,7 @@ Production-ready boilerplate for Android projects built with clean architecture 
 | **UI** | Jetpack Compose · Material 3 · Dynamic Color (Android 12+) |
 | **Architecture** | Clean Architecture · MVVM |
 | **DI** | Hilt / Dagger |
-| **Networking** | Retrofit 2 · OkHttp · Gson |
+| **Networking** | Retrofit 2 · OkHttp · Gson · Network Security Config (SSL pinning) |
 | **Async** | Coroutines · StateFlow |
 | **Testing** | JUnit 4 · Espresso · MockK · Turbine |
 | **Build** | Gradle (Kotlin DSL) · Version Catalog (`libs.versions.toml`) |
@@ -131,6 +131,35 @@ When starting a brand-new app from this repo, also rename `applicationId`, names
 ## Branches
 
 Keep the **default branch** as this lean template so every clone stays a sane foundation for new apps. If you ship a fuller **portfolio demo** (remote API flows, richer UI), maintain it on a **separate branch** and mention it near the top of this README once it exists.
+
+## Network Security & SSL Pinning
+
+Connections to **`hn.algolia.com`** are protected with **certificate pinning** via `app/src/main/res/xml/network_security_config.xml`. The `<pin-set>` includes two SHA-256 pins:
+
+1. **Leaf certificate** — matches the server certificate currently presented by Algolia. This gives a precise bind to the exact identity in use today.
+2. **DigiCert intermediate CA** (backup pin) — matches an issuer in the chain. If Algolia **rotates the leaf** (renewal, reissue, new key) but **keeps the same public CA hierarchy** (DigiCert), the handshake can still satisfy the backup pin, so the app is less likely to break on a routine leaf rotation while **pinning remains meaningful** (we still constrain trust to a known CA path, not “any” system trust store entry for that host).
+
+The pin set declares **`expiration="2027-01-01"`** as a reminder to **re-verify** hashes and the chain before that date; update pins (and the expiration) when certificates or the PKI strategy change.
+
+**Debug builds:** `debug-overrides` trusts both **system** and **user** CAs so you can attach a debuggable build to tools like Charles or mitmproxy (user-installed CA) without turning off pinning logic for the rest of your workflow. Release builds rely on the configured pins for the Algolia host.
+
+### Troubleshooting (demo / Hacker News not loading)
+
+If the UI shows **errors or empty state** only for remote data, work through:
+
+1. **Network and base URL** — confirm the device has internet and, if you customized `API_BASE_URL`, that it still targets **`https://hn.algolia.com/`** (or another host you have intentionally pinned).
+2. **Certificate pinning** — `javax.net.ssl.SSLHandshakeException`, **pin verification failed**, or messages mentioning **NetworkSecurityPolicy** / **TrustManager** in Logcat often mean the **live certificate chain** no longer matches any pin in `network_security_config.xml` (e.g. Algolia switched CA or you are intercepting TLS with a proxy; a proxy-issued leaf will **not** match the production pins).
+3. **Refresh the leaf pin** — extract the SHA-256 SPKI hash of the **current** server certificate and compare it with the first `<pin>` in the config. Example (Git Bash / Unix shell):
+
+```bash
+openssl s_client -connect hn.algolia.com:443 -servername hn.algolia.com < /dev/null 2>/dev/null \
+  | openssl x509 -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | openssl enc -base64
+```
+
+If the output differs from the committed leaf pin, update that pin (and extend `expiration` if needed). If **both** leaf and intermediate pins are wrong (e.g. provider moved off DigiCert), update the **intermediate** pin from the issuer you trust after inspecting the chain (`openssl s_client -showcerts`).
 
 ## License
 

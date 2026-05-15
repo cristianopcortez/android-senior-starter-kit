@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="true">hn.algolia.com</domain>
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">jBR4RoCbwrDXIJ725i8uAxGfJWbErRaldW0/jWSYNWY=</pin>
+            <pin digest="SHA-256">WoiWRyU2Urqe1Hdp8bhCOASOTp0B+2D8XitYvHdfNis=</pin>
+        </pin-set>
+    </domain-config>
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

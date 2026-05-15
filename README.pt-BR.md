@@ -2,7 +2,9 @@
 
 *[English README](README.md)*
 
-Boilerplate pronta para produção para projetos Android com arquitetura limpa e práticas de nível sênior, pensada para escalar. Inclui Jetpack Compose, MVVM, Clean Architecture, injeção de dependências com Hilt e camada de rede com Retrofit — tudo configurado para você partir direto para novas funcionalidades e desafios.
+Boilerplate pronta para produção para projetos Android com arquitetura limpa e práticas de nível sênior, pensada para escalar. Inclui Jetpack Compose, MVVM, Clean Architecture, injeção de dependências com Hilt, camada de rede com Retrofit e **SSL certificate pinning** (Network Security Config) para o host da API de demo — tudo configurado para você partir direto para novas funcionalidades e desafios.
+
+Na branch de demo do Hacker News, o tráfego HTTPS para **`hn.algolia.com`** usa pinning; os detalhes estão na secção **Segurança de rede e SSL Pinning** abaixo.
 
 ## Stack tecnológica
 
@@ -12,7 +14,7 @@ Boilerplate pronta para produção para projetos Android com arquitetura limpa e
 | **UI** | Jetpack Compose · Material 3 · Dynamic Color (Android 12+) |
 | **Arquitetura** | Clean Architecture · MVVM |
 | **DI** | Hilt / Dagger |
-| **Rede** | Retrofit 2 · OkHttp · Gson |
+| **Rede** | Retrofit 2 · OkHttp · Gson · Network Security Config (SSL pinning) |
 | **Assincronismo** | Coroutines · StateFlow |
 | **Testes** | JUnit 4 · Espresso · MockK · Turbine |
 | **Build** | Gradle (Kotlin DSL) · Version Catalog (`libs.versions.toml`) |
@@ -129,6 +131,35 @@ O [`libs.versions.toml`](gradle/libs.versions.toml) também fixa versões para *
 ## Branches
 
 Mantenha a **branch padrão** como este template enxuto, para cada clone continuar sendo uma base estável para novos apps. Se você publicar uma **demo de portfolio** mais completa (fluxos com API remota, UI mais rica), mantenha isso numa **branch separada** e cite o nome dela perto do início deste README quando existir — para quem clone saber onde está o exemplo executável.
+
+## Segurança de rede e SSL Pinning
+
+Conexões com **`hn.algolia.com`** usam **certificate pinning** via `app/src/main/res/xml/network_security_config.xml`. O `<pin-set>` traz dois pins SHA-256:
+
+1. **Certificado leaf** — corresponde ao certificado de servidor que a Algolia entrega hoje, amarrando a identidade exata em uso.
+2. **CA intermediária DigiCert** (pin de backup) — corresponde a um emissor na cadeia. Se a Algolia **rotacionar o leaf** (renovação, reemissão, nova chave), mas **mantiver a mesma hierarquia de CA pública** (DigiCert), o handshake ainda pode satisfazer o pin de backup; o app tende a continuar funcionando em rotações rotineiras de leaf, enquanto **o pinning continua com significado** (ainda restringimos confiança a um caminho de PKI conhecido para aquele host, e não a “qualquer” entrada da trust store do sistema).
+
+O pin set declara **`expiration="2027-01-01"`** como lembrete para **revalidar** os hashes e a cadeia antes dessa data; atualize os pins (e a expiração) quando certificados ou a estratégia de PKI mudarem.
+
+**Builds de debug:** `debug-overrides` confia nas CAs **system** e **user** para você usar ferramentas como Charles ou mitmproxy (CA instalada pelo usuário) sem abrir mão do restante do fluxo de debug. Em release, o host da Algolia segue os pins configurados.
+
+### Solução de problemas (demo / notícias não carregam)
+
+Se a UI mostra **erro ou lista vazia** só para dados remotos, vale checar:
+
+1. **Rede e URL base** — confirme internet no dispositivo e, se você alterou `API_BASE_URL`, que ela ainda aponta para **`https://hn.algolia.com/`** (ou outro host que você tenha pins configurados).
+2. **Certificate pinning** — `javax.net.ssl.SSLHandshakeException`, falha de **pin** ou mensagens com **NetworkSecurityPolicy** / **TrustManager** no Logcat costumam indicar que a **cadeia de certificados ao vivo** não bate mais com nenhum pin em `network_security_config.xml` (por exemplo a Algolia mudou de CA ou há **proxy MITM**; o leaf emitido pelo proxy **não** coincide com os pins de produção).
+3. **Atualizar o pin do leaf** — extraia o hash SHA-256 da SPKI pública do certificado **atual** do servidor e compare com o primeiro `<pin>` do XML. Exemplo (Git Bash / shell Unix):
+
+```bash
+openssl s_client -connect hn.algolia.com:443 -servername hn.algolia.com < /dev/null 2>/dev/null \
+  | openssl x509 -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | openssl enc -base64
+```
+
+Se o resultado for diferente do pin de leaf versionado, atualize esse pin (e o `expiration` se fizer sentido). Se **leaf e intermediária** deixarem de bater (ex.: troca de CA raiz/intermediária), atualize também o pin da **intermediária** a partir do emissor que você aceitar, inspecionando a cadeia (`openssl s_client -showcerts`).
 
 ## Licença
 
