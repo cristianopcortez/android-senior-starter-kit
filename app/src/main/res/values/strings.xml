@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Senior Starter Kit Application</string>
+
+    <!-- Countries (GraphQL portfolio) screen -->
+    <string name="countries_title">Countries · GraphQL</string>
+    <string name="content_desc_reload_countries">Reload countries</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="countries_empty_list">No countries returned.</string>
+    <string name="country_metadata">%1$s · %2$s · %3$s</string>
+    <string name="country_capital_unknown">Capital unknown</string>
+
+    <!-- Preview only -->
+    <string name="preview_country_name">Brazil</string>
+    <string name="preview_country_capital">Brasília</string>
+    <string name="preview_country_continent">South America</string>
 </resources>

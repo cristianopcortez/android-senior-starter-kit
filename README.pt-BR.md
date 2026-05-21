@@ -128,7 +128,56 @@ O [`libs.versions.toml`](gradle/libs.versions.toml) também fixa versões para *
 
 ## Branches
 
-Mantenha a **branch padrão** como este template enxuto, para cada clone continuar sendo uma base estável para novos apps. Se você publicar uma **demo de portfolio** mais completa (fluxos com API remota, UI mais rica), mantenha isso numa **branch separada** e cite o nome dela perto do início deste README quando existir — para quem clone saber onde está o exemplo executável.
+Mantenha a **branch padrão** como este template enxuto, para cada clone continuar sendo uma base estável para novos apps. Demos de **portfolio** mais completas ficam em branches separadas:
+
+| Branch | Demo |
+|--------|------|
+| `feature/portfolio-hacker-news-demo` | Busca Hacker News (Retrofit / REST) |
+| `feature/countries-list-api-graphql` | Lista de países ([Countries GraphQL API](https://countries.trevorblades.com/), Apollo Kotlin) |
+
+### Schema GraphQL (`feature/countries-list-api-graphql`)
+
+**Aviso:** A [Countries API](https://countries.trevorblades.com/) é um serviço GraphQL público mantido por terceiros. O **schema pode mudar com o tempo** (campos novos, nullability mais rígida, tipos renomeados). Este projeto **não** baixa o schema em todo build; usa um **snapshot versionado** em `app/src/main/graphql/schema.graphqls` para builds offline e CI previsíveis. Se a API mudar, o codegen do Apollo ou suas operações `.graphql` podem quebrar até você atualizar esse arquivo.
+
+**Quando atualizar:** build/codegen falhando, erros GraphQL em runtime, ou quando for usar campos novos do schema.
+
+**Como atualizar o schema:**
+
+1. Faça checkout da branch `feature/countries-list-api-graphql` (ou da branch que usa o serviço Apollo `countries`).
+
+2. Adicione temporariamente o bloco `introspection` em `apollo { service("countries") { ... } }` no [`app/build.gradle.kts`](app/build.gradle.kts):
+
+```kotlin
+apollo {
+    service("countries") {
+        packageName.set("br.com.ccortez.seniorstarterkitapplication.graphql")
+        introspection {
+            endpointUrl.set("https://countries.trevorblades.com/graphql")
+            schemaFile.set(file("src/main/graphql/schema.graphqls"))
+        }
+    }
+}
+```
+
+3. Baixe o schema (precisa de rede):
+
+```bash
+./gradlew :app:downloadCountriesApolloSchemaFromIntrospection
+```
+
+No Windows:
+
+```bat
+gradlew.bat :app:downloadCountriesApolloSchemaFromIntrospection
+```
+
+4. Revise o diff em `schema.graphqls` (e ajuste `GetCountries.graphql` / mappers em `data/` se necessário), depois rode:
+
+```bash
+./gradlew :app:assembleDebug
+```
+
+5. Faça commit do `schema.graphqls` atualizado (e de correções em queries/mappers). Remova o bloco temporário `introspection { ... }` do `app/build.gradle.kts` para builds do dia a dia não dependerem do endpoint ao vivo.
 
 ## Licença
 
